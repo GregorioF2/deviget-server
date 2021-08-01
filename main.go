@@ -13,7 +13,7 @@ import (
 
 func newRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/riddles/jug", pricesRequestHandler.GetPriceHandler)
+	router.HandleFunc("/prices", pricesRequestHandler.GetPriceHandler)
 	return router
 }
 

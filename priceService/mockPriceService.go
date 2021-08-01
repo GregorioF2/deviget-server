@@ -3,30 +3,21 @@ package price_service
 import (
 	"fmt"
 	"time"
+
+	. "github.com/gregorioF2/deviget/lib/errors"
 )
 
-type mockResult struct {
-	price float64
-	err   error
+type MockService struct {
+	Results map[string]float64
+	Delay   time.Duration
 }
 
-type mockPriceService struct {
-	numCalls    int
-	mockResults map[string]mockResult // what price and err to return for a particular itemCode
-	callDelay   time.Duration         // how long to sleep on each call so that we can simulate calls to be expensive
-}
+func (m *MockService) GetPriceFor(itemCode string) (float64, error) {
+	time.Sleep(m.Delay) // sleep to simulate expensive call
 
-func (m *mockPriceService) GetPriceFor(itemCode string) (float64, error) {
-	m.numCalls++            // increase the number of calls
-	time.Sleep(m.callDelay) // sleep to simulate expensive call
-
-	result, ok := m.mockResults[itemCode]
+	result, ok := m.Results[itemCode]
 	if !ok {
-		panic(fmt.Errorf("bug in the tests, we didn't have a mock result for [%v]", itemCode))
+		return 0, &NotFoundError{Err: fmt.Sprintf("Item code '%s' not found", itemCode)}
 	}
-	return result.price, result.err
-}
-
-func (m *mockPriceService) getNumCalls() int {
-	return m.numCalls
+	return result, nil
 }

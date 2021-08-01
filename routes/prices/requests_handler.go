@@ -6,18 +6,23 @@ import (
 
 	pricesController "github.com/gregorioF2/deviget/controllers/prices"
 
-	bytesEncoding "github.com/gregorioF2/deviget/lib/utils/bytesEncoding"
+	"encoding/json"
+	"strings"
 
 	. "github.com/gregorioF2/deviget/lib/consts"
 	. "github.com/gregorioF2/deviget/lib/errors"
 )
 
-func getAndValidateGetPriceQueryParams(queryParams map[string][]string) (string, error) {
-	itemCodeParam, ok := queryParams["code"]
+func getAndValidateGetPriceQueryParams(queryParams map[string][]string) ([]string, error) {
+	itemCodesParam, ok := queryParams["codes"]
 	if !ok {
-		return "", &InvalidParametersError{Err: fmt.Sprintf("query param '%s' is required.", "code")}
+		return nil, &InvalidParametersError{Err: fmt.Sprintf("query param '%s' is required.", "codes")}
 	}
-	return itemCodeParam[0], nil
+	res := strings.Split(itemCodesParam[0], ",")
+	if len(res) == 0 {
+		return nil, &InvalidParametersError{Err: "no codes were sent"}
+	}
+	return res, nil
 }
 
 func GetPriceHandler(w http.ResponseWriter, r *http.Request) {
@@ -26,7 +31,7 @@ func GetPriceHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
 	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 
-	itemCode, err := getAndValidateGetPriceQueryParams(r.URL.Query())
+	itemCodes, err := getAndValidateGetPriceQueryParams(r.URL.Query())
 	if err != nil {
 		var responseError *ResponseError
 		switch e := err.(type) {
@@ -39,7 +44,7 @@ func GetPriceHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	price, err := pricesController.GetPricesOfItem(itemCode)
+	price, err := pricesController.GetPricesOfItem(itemCodes)
 	if err != nil {
 		var responseError *ResponseError
 		switch e := err.(type) {
@@ -54,7 +59,12 @@ func GetPriceHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := bytesEncoding.Float64bytes(price)
+	response, err := json.Marshal(price)
+	if err != nil {
+		responseError := &ResponseError{Err: "failed parse response to []byte", StatusCode: HttpStatusCode["ServerError"]["InternalServerError"]}
+		http.Error(w, responseError.Error(), responseError.StatusCode)
+		return
+	}
 
 	w.Write(response)
 

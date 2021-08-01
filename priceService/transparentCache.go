@@ -1,7 +1,6 @@
 package price_service
 
 import (
-	"fmt"
 	"sync"
 	"time"
 )
@@ -40,7 +39,7 @@ func (cache *TransparentCache) GetPriceFor(itemCode string) (float64, error) {
 
 	price, err := cache.actualPriceService.GetPriceFor(itemCode)
 	if err != nil {
-		return 0, fmt.Errorf("getting price from service : %v", err.Error())
+		return 0, err
 	}
 	cache.prices.Store(itemCode, &cacheEntry{value: price, creationTime: time.Now()})
 	return price, nil
@@ -52,8 +51,8 @@ func (cache *TransparentCache) GetPricesFor(itemCodes ...string) ([]float64, err
 	var wg sync.WaitGroup
 	wg.Add(len(itemCodes))
 
-	out := make(chan float64, 1)
-	errs := make(chan error, 1)
+	out := make(chan float64, len(itemCodes))
+	errs := make(chan error, len(itemCodes))
 
 	getPriceAsync := func(itemCode string) {
 		defer wg.Done()
