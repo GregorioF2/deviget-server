@@ -39,7 +39,7 @@ Port where server should be listen to.
 ## Decisions taken
 
 - Replaced the cache price map with the one declared in the package sync (https://pkg.go.dev/sync#Map). Since this one is calculated to be much more performant, since it is optimized for two particular uses. As it says on the documentation is optimized for *when the entry for a given key is only ever written once but read many times*. That seemed to fit in the cache schema
-- Replaced the type of the values in the price map with a custom entry. Since I felt it was the best solution to keep track of each entry time
+- Replaced the type of the values in the price map with a custom entry. Since I thought it was the best solution to keep track of each entry time
 ```
 type cacheEntry struct {
 	creationTime time.Time
@@ -47,6 +47,8 @@ type cacheEntry struct {
 }
 ```
 
-- 
+- Added the initialization of a mock service in the controller in order to test the endpoint. Of course, if there were a real service this would not be part of the solution.
  
+- Added two new tests. One to make sure that if in a multiple query, one item fails, the answer of all is an error.
+And another one to make sure that no Error resolved by the service is cached, since it is a common unexpected behavior in caches.
 
