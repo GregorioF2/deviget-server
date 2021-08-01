@@ -18,10 +18,10 @@ func getAndValidateGetPriceQueryParams(queryParams map[string][]string) ([]strin
 	if !ok {
 		return nil, &InvalidParametersError{Err: fmt.Sprintf("query param '%s' is required.", "codes")}
 	}
-	res := strings.Split(itemCodesParam[0], ",")
-	if len(res) == 0 {
+	if len(itemCodesParam[0]) == 0 {
 		return nil, &InvalidParametersError{Err: "no codes were sent"}
 	}
+	res := strings.Split(itemCodesParam[0], ",")
 	return res, nil
 }
 
