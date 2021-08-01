@@ -29,4 +29,4 @@ func getEnvWithDefaultInt(env string, def int64) int64 {
 
 var SERVER_PORT string = getEnvWithDefault("SERVER_PORT", "3000")
 
-var CACHE_MAX_TIME int64 = getEnvWithDefaultInt("CACHE_MAX_TIME", 60)
+var CACHE_MAX_TIME int64 = getEnvWithDefaultInt("CACHE_MAX_TIME", 60) // On seconds
