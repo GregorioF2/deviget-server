@@ -170,3 +170,40 @@ func TestGetPricesFor_ParallelizeCalls(t *testing.T) {
 		t.Error("calls took too long, expected them to take a bit over one second")
 	}
 }
+
+// NEW TEST
+func TestGetPricesFor_ParallelizeCallsError(t *testing.T) {
+	mockService := &mockPriceService{
+		callDelay: time.Second,
+		mockResults: map[string]mockResult{
+			"p1": {price: 5, err: nil},
+			"p2": {price: 7, err: fmt.Errorf("some error")},
+		},
+	}
+
+	cache := NewTransparentCache(mockService, time.Minute)
+	_, err := cache.GetPricesFor("p1", "p2")
+	if err == nil {
+		t.Errorf("expected error, got nil")
+	}
+}
+
+func TestGetPriceFor_OnlyCachesValidResultsAndNotErrors(t *testing.T) {
+	mockService := &mockPriceService{
+		callDelay: time.Second,
+		mockResults: map[string]mockResult{
+			"p1": {price: 5, err: fmt.Errorf("some error")},
+		},
+	}
+
+	cache := NewTransparentCache(mockService, time.Minute)
+	_, err := cache.GetPriceFor("p1")
+	if err == nil {
+		t.Errorf("expected error, got nil")
+	}
+
+	mockService.mockResults["p1"] = mockResult{price: 5, err: nil}
+	assertFloat(t, 5, getPriceWithNoErr(t, cache, "p1"), "wrong price returned")
+	assertFloat(t, 5, getPriceWithNoErr(t, cache, "p1"), "wrong price returned")
+	assertInt(t, 2, mockService.getNumCalls(), "wrong number of service calls")
+}

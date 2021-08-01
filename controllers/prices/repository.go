@@ -10,15 +10,15 @@ import (
 	errors "github.com/gregorioF2/deviget/lib/errors"
 )
 
-type MockService struct {
-	Results map[string]float64
-	Delay   time.Duration
+type mockService struct {
+	results map[string]float64
+	delay   time.Duration
 }
 
-func (m *MockService) GetPriceFor(itemCode string) (float64, error) {
-	time.Sleep(m.Delay) // sleep to simulate expensive call
+func (m *mockService) GetPriceFor(itemCode string) (float64, error) {
+	time.Sleep(m.delay) // sleep to simulate expensive call
 
-	result, ok := m.Results[itemCode]
+	result, ok := m.results[itemCode]
 	if !ok {
 		return 0, &errors.NotFoundError{Err: fmt.Sprintf("Item code '%s' not found", itemCode)}
 	}
@@ -28,12 +28,12 @@ func (m *MockService) GetPriceFor(itemCode string) (float64, error) {
 var service *priceService.TransparentCache
 
 func init() {
-	var mock *MockService = &MockService{
-		Results: map[string]float64{
+	var mock *mockService = &mockService{
+		results: map[string]float64{
 			"p1": 5,
 			"p2": 7,
 		},
-		Delay: time.Duration(2) * time.Second,
+		delay: time.Duration(2) * time.Second,
 	}
 
 	service = priceService.NewTransparentCache(mock, time.Duration(configs.CACHE_MAX_TIME)*time.Second)
