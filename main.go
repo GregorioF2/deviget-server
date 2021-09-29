@@ -8,12 +8,14 @@ import (
 
 	"github.com/gorilla/mux"
 	config "github.com/gregorioF2/deviget/configs"
+	middlewares "github.com/gregorioF2/deviget/middlewares"
 	pricesRequestHandler "github.com/gregorioF2/deviget/routes/prices"
 )
 
 func newRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/prices", pricesRequestHandler.GetPriceHandler)
+	router.Use(middlewares.SetCorsHeaders)
 	return router
 }
 

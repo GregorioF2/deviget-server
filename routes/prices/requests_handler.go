@@ -26,11 +26,6 @@ func getAndValidateGetPriceQueryParams(queryParams map[string][]string) ([]strin
 }
 
 func GetPriceHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-
 	itemCodes, err := getAndValidateGetPriceQueryParams(r.URL.Query())
 	if err != nil {
 		var responseError *ResponseError
